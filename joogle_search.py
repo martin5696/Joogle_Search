@@ -13,8 +13,15 @@ from oauth2client.client import flow_from_clientsecrets
 from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
 
+#call back function for GET http request. It returns template/homepage.tpl as the view for the root page
+@get('/')
+def search():
+    return template('homepage')
+
+
+
 #sign-in page
-@route('/', 'GET')
+@route('/login', 'GET')
 def home():
   flow = flow_from_clientsecrets("client_secrets.json",scope='https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile', redirect_uri="http://localhost:8080/redirect")
   uri = flow.step1_get_authorize_url()
@@ -44,7 +51,10 @@ def redirect_page():
   users_service = build('oauth2', 'v2', http=http)
   user_document = users_service.userinfo().get().execute()
   user_email = user_document['email']
+  bottle.redirect('/')
   return user_document
+
+
 
 
 #session management
@@ -61,10 +71,7 @@ app = SessionMiddleware(bottle.app(), session_opts)
 #global variable hash to store how many times each word has appeared in all the searches in current session
 word_occurence_history={}
 
-#call back function for GET http request. It returns template/homepage.tpl as the view for the root page
-#@get('/')
-def search():
-    return template('homepage')
+
 
 #call back function for POST http request. It's the result page after form submission and returns template/resultpage.tpl
 @post('/')

@@ -4,7 +4,7 @@
   </head>
   <div class="homepage">
     <div class="header">
-      <a class="sign-in">Sign in</a>
+      <a class="sign-in" href="/login">Sign in</a>
     </div>
     <div class="body">
       <h1 class="title">Joogle</h1>
