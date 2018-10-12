@@ -1,0 +1,45 @@
+{
+	document_index: 
+		{ doc_id: 
+			{
+				title: ______, #string
+				url: ______, #string
+				words: ______, #list
+			}
+		},
+		{ doc_id: 
+			{
+				title: ______,
+				url: ______,
+				words: ______,
+			}
+		},
+		{ doc_id: 
+			{
+				title: ______,
+				url: ______,
+				words: ______,
+			}
+		}, ...
+	,
+
+	lexicon: [
+		{ keyword_string: wordIDs },
+		{ keyword_string: wordIDs },
+		{ keyword_string: wordIDs },
+		{ keyword_string: wordIDs },
+		...
+	],
+	inverted_index: [
+	 { word_id: [doc_id1, doc_id2, doc_id3, ...] },
+	 { word_id: [doc_id1, doc_id2, doc_id3, ...] },
+	 { word_id: [doc_id1, doc_id2, doc_id3, ...] },
+	 ...
+	]
+}
+
+● Document Index, that keeps information about each document. This document should be ordered by document id.
+
+● Lexicon, that keeps a list of words.
+
+● Inverted Index, that returns a list of document Ids given a word id

@@ -1,0 +1,25 @@
+.resultpage {
+  display: flex;
+  justify-content: center;
+  font-family: arial, sans-serif;
+}
+
+p {
+  text-align: center;
+}
+
+table {
+  border-collapse: collapse;
+  margin-top: 10px;
+  width: 100%;
+}
+
+caption {
+  margin-bottom: 10px;
+}
+
+th, td {
+  border: 1px solid #dddddd;
+  padding: 5px;
+  text-align: center;
+}

@@ -1,0 +1,37 @@
+.homepage {
+  text-align: center;
+  width: 100%;
+  height: auto;
+  padding-top: 130px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 50px;
+}
+
+.input-search-box {
+  width: 584px;
+  height: 44px;
+  margin-bottom: 15px;
+}
+
+.search-buttons {
+  padding-top: 18px;
+}
+
+.search-buttons input {
+  background-color: #f2f2f2;
+  border: 1px solid #f2f2f2;
+  border-radius: 2px;
+  color: #757575;
+  cursor: default;
+  font-family: arial, sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  margin: 11px 4px;
+  min-width: 54px;
+  padding: 0 16px;
+  text-align: center;
+  height: 36px;
+}
