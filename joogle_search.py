@@ -13,6 +13,7 @@ from oauth2client.client import flow_from_clientsecrets
 from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
 
+#sign-in page
 @route('/', 'GET')
 def home():
   flow = flow_from_clientsecrets("client_secrets.json",scope='https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile', redirect_uri="http://localhost:8080/redirect")
@@ -25,7 +26,6 @@ def redirect_page():
   code = request.query.get('code', '')
 
   #parse json to get client id and client secret
-
   with open('client_secrets.json','r') as f:
     data = json.load(f)
 
@@ -46,7 +46,7 @@ def redirect_page():
   user_email = user_document['email']
   return user_document
 
-
+;
 #session management
 session_opts = {
     'session.type': 'file',
@@ -132,6 +132,3 @@ def server_static(filename):
   return static_file(filename, root='./static_files')
 
 run (host='localhost', port=8080, debug=True)
-
-
-
