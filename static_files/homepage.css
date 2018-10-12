@@ -1,4 +1,26 @@
-.homepage {
+.header {
+  text-align: right;
+  width: 100%;
+  height: auto;
+  padding-top: 7px;
+  margin: 0 auto;
+}
+
+.sign-in {
+  color: #fff;
+  border: 1px solid #4285f4;
+  font-weight: bold;
+  outline: none;
+  background: -webkit-linear-gradient(top,#4387fd,#4683ea);
+  display: inline-block;
+  line-height: 28px;
+  padding: 0 12px;
+  border-radius: 2px;
+  font-family: arial, sans-serif;
+  font-size: 13px;
+}
+
+.body {
   text-align: center;
   width: 100%;
   height: auto;

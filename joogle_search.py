@@ -46,7 +46,7 @@ def redirect_page():
   user_email = user_document['email']
   return user_document
 
-;
+
 #session management
 session_opts = {
     'session.type': 'file',
