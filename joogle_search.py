@@ -5,6 +5,8 @@ import bottle as bottle
 import json
 import httplib2
 
+import requests
+
 from beaker.middleware import SessionMiddleware
 
 #Google Authentication
@@ -18,13 +20,18 @@ from googleapiclient.discovery import build
 def search():
     return template('homepage')
 
-
+#redirect_uri is what the API server automatically after user have completed the authorization flow once. 
+#we're authorizing user for access of data, not authenticating. we can't log user out of authorization flow, but we can revoke the token.
+#if we revoke the token, they would have to log in again.
 
 #sign-in page
 @route('/login', 'GET')
 def home():
   flow = flow_from_clientsecrets("client_secrets.json",scope='https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile', redirect_uri="http://localhost:8080/redirect")
+  #if already authorized, uri contains code. If node it conains access_denied
   uri = flow.step1_get_authorize_url()
+  print ("---------in login method")
+  print ("----------redirect uri is {}",uri)
   bottle.redirect(str(uri))
 
 
@@ -44,6 +51,11 @@ def redirect_page():
   flow = OAuth2WebServerFlow(client_id=CLIENT_ID, client_secret=CLIENT_SECRET, scope='https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile', redirect_uri=REDIRECT_URI)
   credentials = flow.step2_exchange(code)
   token = credentials.id_token['sub']
+  print ("hi this is the token1",token)
+  token2,expiry = credentials.get_access_token()
+  
+  print ("hi this is token 2",token2)
+  print ("hi this is credentials",credentials)
 
   http = httplib2.Http()
   http = credentials.authorize(http)
@@ -51,20 +63,34 @@ def redirect_page():
   users_service = build('oauth2', 'v2', http=http)
   user_document = users_service.userinfo().get().execute()
   user_email = user_document['email']
+  #session['email'] = user_email
+  #http2 = httplib2.Http()
+  #credentials.revoke(http)
+
+  #session = bottle.request.environ.get('beaker.session')
+  #session.delete()
+  print ("-------------Redirecting------------")
+  r = requests.post('https://accounts.google.com/o/oauth2/revoke',
+    params={'token': token2},
+    headers = {'content-type': 'application/x-www-form-urlencoded'})  #r = requests.post('https://accounts.google.com/o/oauth2/revoke',
+   # params={'token': token},
+    #headers = {'content-type': 'application/x-www-form-urlencoded'})
+  print ("hi this is r",r)
   bottle.redirect('/')
   return user_document
 
 
 
 
-#session management
-session_opts = {
-    'session.type': 'file',
-    'session.cookie_expires': 300,
-    'session.data_dir': './data',
-    'session.auto': True
-}
-app = SessionMiddleware(bottle.app(), session_opts)
+# #session management
+# session_opts = {
+#     'session.type': 'file',
+#     'session.cookie_expires': 300,
+#     'session.data_dir': './data',
+#     'session.auto': True
+# }
+# app = SessionMiddleware(bottle.app(), session_opts)
+# bottle.run(app=app)
 
 
 
