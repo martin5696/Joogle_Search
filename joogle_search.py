@@ -28,14 +28,10 @@ def search():
   session = request.environ.get('beaker.session')
   if 'logged_in' in session:
     if session['logged_in'] == True:
-      print ("Name: ", session['name'])
-
         #read user search history from file
       if (os.path.isfile(search_history_path+session['email'])):
         f = open(search_history_path+session['email'],"r")
         contents = f.read()
-        print ("session: ",session)
-        print ("contents: ",contents)
         search_history_from_file = json.loads(contents)
         word_occurence_history = search_history_from_file
 
@@ -89,7 +85,6 @@ def redirect_page():
 
   session = request.environ.get('beaker.session')
   session['logged_in'] = True
-  print ("user document", user_document)
   session['name'] = user_document['name']
   session['email'] = user_document['email']
   session['picture'] = user_document['picture']
@@ -130,8 +125,6 @@ def do_search():
     
     session = request.environ.get('beaker.session')
 
-    #print ("----------logged_in: ",session['logged_in'])
-
     #if user logged in, display search history and store current search results
     if session['logged_in'] == True:
       #input words from current search into the global variable word_occurence_history
@@ -171,6 +164,7 @@ def findWordOccurenceInQuery(words):
 #input words from current search into the global variable word_occurence_history
 def inputWordsInOccurrenceHistory(word_occurrence):
   global word_occurence_history
+  global search_history_path
 
   for word in word_occurrence:
     if word in word_occurence_history:
@@ -184,16 +178,8 @@ def inputWordsInOccurrenceHistory(word_occurrence):
   email = session['email']
 
   #write word occurence history to file
-  f = open("search_history/"+email,"w")
-
+  f = open(search_history_path+email,"w")
   f.write(str(json.dumps(word_occurence_history)))
-
-
-
-  #f=open(email,"w+")
-  #f.write(word_occurence_history)
-
-
 
 
 
