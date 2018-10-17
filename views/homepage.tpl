@@ -4,11 +4,11 @@
   </head>
   <div class="homepage">
     <div class="header">
-      <a class="sign-in" href="/login">Sign in</a>
+      <a class="sign-in" href="/signout">Sign out</a>
     </div>
     <div class="body">
       <h1 class="title">Joogle</h1>
-      <form action="/" method="post">
+      <form action="/results" method="post">
         <input name="keywords" type="text" class="input-search-box"/>
         <br>
         <div class="search-buttons">
