@@ -1,6 +1,7 @@
 from bottle import get, post, route, run, template, request, re, static_file
 from operator import itemgetter
 
+import os
 import bottle as bottle
 import json
 import httplib2
@@ -15,23 +16,38 @@ from oauth2client.client import flow_from_clientsecrets
 from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
 
-#global variable to store Google profile information of user
-user_profile_information = {}
 
 #global variable hash to store how many times each word has appeared in all the searches in current session
 word_occurence_history={}
+search_history_path="search_history/"
 
 #call back function for GET http request. It returns template/homepage.tpl as the view for the root page
 @get('/')
 def search():
+  global word_occurence_history
   session = request.environ.get('beaker.session')
   if 'logged_in' in session:
     if session['logged_in'] == True:
+      print ("Name: ", session['name'])
+
+        #read user search history from file
+      if (os.path.isfile(search_history_path+session['email'])):
+        f = open(search_history_path+session['email'],"r")
+        contents = f.read()
+        print ("session: ",session)
+        print ("contents: ",contents)
+        search_history_from_file = json.loads(contents)
+        word_occurence_history = search_history_from_file
+
       return template('homepage')
     else:
       return template('homepage_anonymous')
   else:
     session['logged_in'] = False
+    session['name'] = ''
+    session['email'] = ''    
+    session['picture'] = ''
+
     bottle.redirect('/')
 
 #redirect_uri is what the API server automatically calls after user have completed the authorization flow once.
@@ -70,21 +86,25 @@ def redirect_page():
   # Get user email
   users_service = build('oauth2', 'v2', http=http)
   user_document = users_service.userinfo().get().execute()
-  user_email = user_document['email']
-
-  global user_profile_information
-  user_profile_information = user_document
 
   session = request.environ.get('beaker.session')
   session['logged_in'] = True
+  print ("user document", user_document)
+  session['name'] = user_document['name']
+  session['email'] = user_document['email']
+  session['picture'] = user_document['picture']
+
+
+
 
   bottle.redirect('/')
 
 @route('/signout', 'GET')
 def signout():
+  global word_occurence_history
   session = request.environ.get('beaker.session')
   session.delete()
-
+  word_occurence_history = {}
   bottle.redirect('/')
 
 # session management
@@ -105,34 +125,27 @@ def do_search():
     #parse words to remove special characters and split into a list of individual words
     words = parseQueryIntoWordList(keywords)
 
-    #hash to store each word and how many times it has appeared in current search. {word:word_occurence}
-    query_word_occurence = {}
-
     #populate query_word_occurence
     query_word_occurence = findWordOccurenceInQuery(words)
-
-    #input words from current search into the global variable word_occurence_history
-    inputWordsInOccurrenceHistory(query_word_occurence)
-
-    #return the top 20 most frequently searched words in word_occurence_history
-    sorted_words = getTop10KeywordsDescending()
     
-    #use template/resultpage.tmp as the view for the search results page
-    return template('resultpage', keywords = keywords, sorted_words = sorted_words, query_word_occurence = query_word_occurence)
+    session = request.environ.get('beaker.session')
 
-@post('/results_anonymous')
-def do_search():
-    #get the raw input from user using an html form
-    keywords = request.forms.get('keywords')
+    #print ("----------logged_in: ",session['logged_in'])
 
-    #parse words to remove special characters and split into a list of individual words
-    words = parseQueryIntoWordList(keywords)
+    #if user logged in, display search history and store current search results
+    if session['logged_in'] == True:
+      #input words from current search into the global variable word_occurence_history
+      inputWordsInOccurrenceHistory(query_word_occurence)
 
-    #populate query_word_occurence
-    query_word_occurence = findWordOccurenceInQuery(words)
+      #return the top 20 most frequently searched words in word_occurence_history
+      sorted_words = getTop10KeywordsDescending()
 
-    #use template/resultpage.tmp as the view for the search results page
-    return template('resultpage_anonymous', keywords = keywords, query_word_occurence = query_word_occurence)
+      #use template/resultpage.tmp as the view for the search results page
+      return template('resultpage', keywords = keywords, sorted_words = sorted_words, query_word_occurence = query_word_occurence)
+
+    else:
+      return template('resultpage_anonymous', keywords = keywords, query_word_occurence = query_word_occurence)
+
 
 #parse words to remove special characters and split into a list of individual words
 def parseQueryIntoWordList(query):
@@ -164,6 +177,25 @@ def inputWordsInOccurrenceHistory(word_occurrence):
         word_occurence_history[word] += word_occurrence[word]
     else:
         word_occurence_history[word] = word_occurrence[word]
+  # store occurence history in file
+  # only called if a user is logged in
+  # local@domain.com__history
+  session = request.environ.get('beaker.session')
+  email = session['email']
+
+  #write word occurence history to file
+  f = open("search_history/"+email,"w")
+
+  f.write(str(json.dumps(word_occurence_history)))
+
+
+
+  #f=open(email,"w+")
+  #f.write(word_occurence_history)
+
+
+
+
 
 #return the top 20 most frequently searched words in word_occurence_history
 def getTop10KeywordsDescending():
