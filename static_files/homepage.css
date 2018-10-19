@@ -1,12 +1,12 @@
 .header {
-  text-align: right;
+  display: flex;
   width: 100%;
   height: auto;
   padding-top: 7px;
   margin: 0 auto;
 }
 
-.sign-in {
+.sign-in, .sign-out {
   color: #fff;
   border: 1px solid #4285f4;
   font-weight: bold;
@@ -18,6 +18,34 @@
   border-radius: 2px;
   font-family: arial, sans-serif;
   font-size: 13px;
+  text-decoration: none;
+}
+
+.left-side {
+  text-align: left;
+  flex: 1;
+}
+
+.right-side {
+  text-align: right;
+  flex: 1;
+}
+
+.user-info {
+  display: inline-block;
+  font-family: arial, sans-serif;
+  font-weight: bold;
+}
+
+.header img {
+  border-radius: 50%;
+  height: 32px;
+  width: 32px;
+  vertical-align: middle;
+}
+
+.user-info .name {
+  margin-left: 5px;
 }
 
 .body {

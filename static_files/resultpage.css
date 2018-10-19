@@ -1,24 +1,74 @@
-.resultpage {
+.header {
+  display: flex;
+  width: 100%;
+  height: auto;
+  padding-top: 7px;
+  margin: 0 auto;
+}
+
+.sign-in, .sign-out {
+  color: #fff;
+  border: 1px solid #4285f4;
+  font-weight: bold;
+  outline: none;
+  background: -webkit-linear-gradient(top,#4387fd,#4683ea);
+  display: inline-block;
+  line-height: 28px;
+  padding: 0 12px;
+  border-radius: 2px;
+  font-family: arial, sans-serif;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.left-side {
+  text-align: left;
+  flex: 1;
+}
+
+.right-side {
+  text-align: right;
+  flex: 1;
+}
+
+.user-info {
+  display: inline-block;
+  font-family: arial, sans-serif;
+  font-weight: bold;
+}
+
+.header img {
+  border-radius: 50%;
+  height: 32px;
+  width: 32px;
+  vertical-align: middle;
+}
+
+.user-info .name {
+  margin-left: 5px;
+}
+
+.body {
   display: flex;
   justify-content: center;
   font-family: arial, sans-serif;
 }
 
-p {
+.query-data-tables p {
   text-align: center;
 }
 
-table {
+.query-data-tables table {
   border-collapse: collapse;
   margin-top: 10px;
   width: 100%;
 }
 
-caption {
+.query-data-tables caption {
   margin-bottom: 10px;
 }
 
-th, td {
+.query-data-tables th, td {
   border: 1px solid #dddddd;
   padding: 5px;
   text-align: center;
