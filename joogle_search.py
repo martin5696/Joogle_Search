@@ -75,10 +75,6 @@ def search():
 
     bottle.redirect('/')
 
-# redirect_uri is what the API server automatically calls after user have completed the authorization flow once.
-# we're authorizing user for access of data, not authenticating. we can't log user out of authorization flow, but we can revoke the token.
-# if we revoke the token, they would have to log in again.
-
 # sign-in page
 @route('/signin', 'GET')
 def home():
@@ -87,7 +83,6 @@ def home():
   # if already authorized, uri contains code. If node it conains access_denied
   uri = flow.step1_get_authorize_url()
   bottle.redirect(str(uri))
-
 
 @route('/redirect')
 def redirect_page():
@@ -109,7 +104,7 @@ def redirect_page():
   http = httplib2.Http()
   http = credentials.authorize(http)
 
-  # get user email
+  # add user info into the session
   users_service = build('oauth2', 'v2', http=http)
   user_document = users_service.userinfo().get().execute()
 
@@ -121,6 +116,7 @@ def redirect_page():
 
   bottle.redirect('/')
 
+# delete the user's session and redirect back to the home page
 @route('/signout', 'GET')
 def signout():
   global word_occurence_history

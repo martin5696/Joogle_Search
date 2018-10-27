@@ -1,4 +1,4 @@
-# FRONTEND Overview /Instructions 
+# FRONTEND Overview/Instructions 
 # how we are referencing our CSS/tpl files
 
 Main files:
@@ -19,7 +19,6 @@ This view uses the following template file:
 - views/homepage.tpl
 The corresponding CSS file is:
 - static_files/homepage.css
-
 
 The result page:
 - The call back function of the http POST request for the root url but after form submission is called do_search() in joogle_search.py
@@ -76,6 +75,14 @@ One additional route in joogle_search.py:
 	# 2. in a separate command line, run this file
 	# this file tests whether the new functions added into crawler.py return the correct output
 	> python test_crawler.py
-<!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE5MzE0NTQ2MzNdfQ==
--->
+
+
+# Lab 2 AWS Information
+
+Public IP Address: 52.205.163.37
+
+Benchmark Setup: 
+- As the server is currently running on a detached AWS instance screen with the associated Public IP Address, we use another AWS instance as the benchmarks driver
+- We use the other AWS instance to run a simple benchmark using ab by specifying the number of requests and number of concurrent connections
+- On the detached AWS instance, we run htop, iostat and iftop when the simple benchmark is running and recording that data at itx maximum and minimum values
+
