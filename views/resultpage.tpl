@@ -43,9 +43,9 @@
         </table>
         % if user_info['logged_in']:
           <table class="history">
-            <caption>History</caption>
+            <caption>10 Most Recent Searches</caption>
             <tr>
-              <th>10 Recent Searches</th>
+              <th>Keywords</th>
             </tr>
             % for word in recent_search_list:
               <tr>
