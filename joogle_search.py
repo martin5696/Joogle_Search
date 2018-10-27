@@ -5,6 +5,8 @@ import os
 import bottle as bottle
 import json
 import httplib2
+import ast
+from collections import OrderedDict
 
 import requests
 
@@ -28,13 +30,19 @@ app = SessionMiddleware(bottle.app(), session_opts)
 # global variable hash to store how many times each word has appeared in all the searches in current session
 word_occurence_history={}
 
+# global variable hash to store the most recent searches by this user
+recent_search_history=[]
+
 # global variable containing a directory path to a particular user's word occurence history
 search_history_path="search_history/"
+
+recent_history_path="recent_history/"
 
 # callback function for GET http request. It returns template/homepage.tpl as the view for the root page
 @get('/')
 def search():
   global word_occurence_history
+  global recent_search_history
   session = request.environ.get('beaker.session')
   if 'logged_in' in session:
     if session['logged_in'] == True:
@@ -45,6 +53,16 @@ def search():
         contents = f.read()
         search_history_from_file = json.loads(contents)
         word_occurence_history = search_history_from_file
+
+      # read user's recent history from file
+      mylist=[]
+      if (os.path.isfile(recent_history_path+session['email'])):
+        with open(recent_history_path+session['email'], 'r') as f:
+          mylist = ast.literal_eval(f.read())
+        print("recent history list: ",mylist)
+        recent_search_from_file = mylist
+        recent_search_history = recent_search_from_file
+        print(recent_search_history)
 
     user_info = { 'logged_in': session['logged_in'], 'name': session['name'], 'picture_path': session['picture'] }
 
@@ -109,11 +127,13 @@ def signout():
   session = request.environ.get('beaker.session')
   session.delete()
   word_occurence_history = {}
+  recent_search_history = []
   bottle.redirect('/')
 
 # callback function for POST http request. It's the result page after form submission and returns template/resultpage.tpl
 @post('/results')
 def do_search():
+    global recent_search_history
     # get the raw input from user using an html form
     keywords = request.forms.get('keywords')
 
@@ -130,15 +150,23 @@ def do_search():
       # input words from current search into the global variable word_occurence_history
       inputWordsInOccurrenceHistory(query_word_occurence)
 
+      # input words from current search into the global variable recent_search_history
+      # this function also removes duplicates from recent_search_history
+      inputWordsInRecentHistory(words)
+
+      #get 10 words from recent_search_list from global var recent_search_history
+      recent_search_list = recent_search_history[:10]
+
       # return the top 20 most frequently searched words in word_occurence_history
       sorted_words = getTop10KeywordsDescending()
     else:
       sorted_words = []
+      recent_search_list = []
 
     user_info = { 'logged_in': session['logged_in'], 'name': session['name'], 'picture_path': session['picture'] }
 
     # use template/resultpage.tmp as the view for the search results page
-    return template('resultpage', user_info = user_info, keywords = keywords, sorted_words = sorted_words, query_word_occurence = query_word_occurence)
+    return template('resultpage', user_info = user_info, keywords = keywords, recent_search_list = recent_search_list, sorted_words = sorted_words, query_word_occurence = query_word_occurence)
 
 
 # parse words to remove special characters and split into a list of individual words
@@ -161,6 +189,29 @@ def findWordOccurenceInQuery(words):
         query_word_occurence[word] = 1
 
   return query_word_occurence
+
+
+# input words from current search into the global variable recent_search_history
+def inputWordsInRecentHistory(words):
+  global recent_search_history
+  global recent_history_path
+
+  for word in words:
+    recent_search_history.insert(0,word)
+
+  # store recent search history in file
+  # only called if a user is logged in
+  # local@domain.com__history
+  session = request.environ.get('beaker.session')
+  email = session['email']
+
+  #remove duplicates in recent_history before writing to file
+  s=list(OrderedDict.fromkeys(recent_search_history))
+  recent_search_history=s
+
+  # write word occurence history to file. The file will never have duplicates
+  f = open(recent_history_path+email,"w")
+  f.write(str(recent_search_history))
 
 # input words from current search into the global variable word_occurence_history
 def inputWordsInOccurrenceHistory(word_occurrence):

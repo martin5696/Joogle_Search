@@ -45,13 +45,11 @@
           <table class="history">
             <caption>History</caption>
             <tr>
-              <th>Top 20 Keywords</th>
-              <th>Number of Occurrences</th>
+              <th>10 Recent Searches</th>
             </tr>
-            % for word in sorted_words:
+            % for word in recent_search_list:
               <tr>
-                <td class="word">{{ word[0] }}</td>
-                <td class="number-of-occurrences">{{ word[1] }}</td>
+                <td class="word">{{ word}}</td>
               </tr>
             % end
           </table>
