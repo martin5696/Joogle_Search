@@ -1,0 +1,25 @@
+PageRank Datastructures
+
+
+
+One Time Setup before first query:
+1. run crawler.py on urls.txt
+
+In crawler.py:
+- need to create link datastructure and store incoming+outgoing links and store in persistent database
+- store the backend datastructures from lab1 in persistent database (document_index,...)
+
+2. run pagerank.py and store the result in persistent database
+
+
+
+
+During every query:
+
+1. Filter all doc_id's that match query word using document_index
+2. sort result from one based on pageRank
+3. display
+
+
+
+

@@ -120,6 +120,7 @@ class crawler(object):
         self.inverted_lexicon = {}
         self.inverted_index = {}
         self.resolved_inverted_index = {}
+        self.links = {}
 
         # get all urls into the queue
         try:
@@ -246,6 +247,8 @@ class crawler(object):
             #insert word and word_ids into the lexicon data structures
             self.lexicon[word] = self.word_id(word)
             self.inverted_lexicon[self.word_id(word)] = word
+
+            
         
     def _text_of(self, elem):
         """Get the text inside some element without any tags."""
@@ -278,12 +281,16 @@ class crawler(object):
 
             # html tag
             if isinstance(tag, Tag):
-
+                
                 if tag.parent != stack[-1]:
                     self._exit[stack[-1].name.lower()](stack[-1])
                     stack.pop()
 
                 tag_name = tag.name.lower()
+
+                if tag_name == 'a':
+                    print ("Jorge's tags: ", tag_name)
+                    print ("href: ",tag['href'])
 
                 # ignore this tag and everything in it
                 if tag_name in self._ignored_tags:
@@ -379,6 +386,8 @@ class crawler(object):
                 self._populate_document_index()
                 self._populate_inverted_index()
                 self._populate_resolved_inverted_index()
+
+                
 
             except Exception as e:
                 print e
