@@ -79,10 +79,13 @@ One additional route in joogle_search.py:
 
 # Lab 2 AWS Information
 
+To Launch an instance:
+> python launch_aws_instance.py
+
 Public IP Address: 52.205.163.37
 
 Benchmark Setup: 
 - As the server is currently running on a detached AWS instance screen with the associated Public IP Address, we use another AWS instance as the benchmarks driver
 - We use the other AWS instance to run a simple benchmark using ab by specifying the number of requests and number of concurrent connections
-- On the detached AWS instance, we run htop, iostat and iftop when the simple benchmark is running and recording that data at itx maximum and minimum values
+- On the detached AWS instance, we run htop, iostat and iftop when the simple benchmark is running and recording that data at its maximum and minimum values
 
