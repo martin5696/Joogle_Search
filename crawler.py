@@ -116,11 +116,13 @@ class crawler(object):
 
         # data structures to be maintained
         self.document_index = {}
+        self.url_to_doc_id_index = {}
         self.lexicon = {}
         self.inverted_lexicon = {}
         self.inverted_index = {}
         self.resolved_inverted_index = {}
-        self.links = {}
+        self.links = []
+        self.links_by_doc_id = []
 
         # get all urls into the queue
         try:
@@ -288,12 +290,13 @@ class crawler(object):
 
                 tag_name = tag.name.lower()
 
-                if tag_name == 'a':
-                    print ("Jorge's tags: ", tag_name)
-                    print ("href: ",tag['href'])
+                if tag_name == 'a' and tag['href'] != '':
+                  tag_url = tag['href']
+
+                  self.links.append(tuple((self._curr_url, tag_url)))
 
                 # ignore this tag and everything in it
-                if tag_name in self._ignored_tags:
+                elif tag_name in self._ignored_tags:
                     if tag.nextSibling:
                         tag = NextTag(tag.nextSibling)
                     else:
@@ -322,6 +325,8 @@ class crawler(object):
         curr_doc['url'] = self._curr_url
         curr_doc['word_id'] = curr_word_id_list
         self.document_index[self._curr_doc_id] = curr_doc
+        self.url_to_doc_id_index[self._curr_url] = self._curr_doc_id
+
 
     def _populate_inverted_index(self):
         for word_id in self.inverted_lexicon:
@@ -347,6 +352,16 @@ class crawler(object):
 
     def get_resolved_inverted_index(self):
         return self.resolved_inverted_index
+
+    def _convert_links_to_doc_id(self):
+        print('----------------------------------------------------------------------')
+        print(self.links)
+        for pair in self.links:
+            doc_id_tuple = tuple(self.url_to_doc_id_index[pair[0]], self.url_to_doc_id_index[pair[1]])
+            print(doc_id_tuple)
+            self.links_by_doc_id.append(doc_id_tuple)
+
+        print(self.links_by_doc_id)
 
     def crawl(self, depth=2, timeout=3):
         """Crawl the web!"""
@@ -380,14 +395,15 @@ class crawler(object):
                 self._curr_words = []
                 self._index_document(soup)
                 self._add_words_to_document()
-                print "    url="+repr(self._curr_url)
 
                 # populate data structures
                 self._populate_document_index()
                 self._populate_inverted_index()
                 self._populate_resolved_inverted_index()
-
-                
+                self._convert_links_to_doc_id()
+                print('----------------------------------------')
+                print(self.links)
+                print('----------------------------------------')
 
             except Exception as e:
                 print e
