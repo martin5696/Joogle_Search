@@ -73,3 +73,7 @@
   padding: 5px;
   text-align: center;
 }
+
+.body .pagination-buttons .cur {
+  font-weight: bold;
+}
