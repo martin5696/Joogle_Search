@@ -293,6 +293,9 @@ class crawler(object):
                 if tag_name == 'a' and tag['href'] != '':
                   tag_url = tag['href']
 
+                  if not tag_url.startswith("http"):
+                    tag_url = self._curr_url+tag_url
+
                   self.links.append(tuple((self._curr_url, tag_url)))
 
                 # ignore this tag and everything in it
@@ -354,14 +357,25 @@ class crawler(object):
         return self.resolved_inverted_index
 
     def _convert_links_to_doc_id(self):
-        print('----------------------------------------------------------------------')
-        print(self.links)
+        #print ("url_to_doc_id_index: ", self.url_to_doc_id_index)
+        #print(self.links)
         for pair in self.links:
-            doc_id_tuple = tuple(self.url_to_doc_id_index[pair[0]], self.url_to_doc_id_index[pair[1]])
-            print(doc_id_tuple)
+            #print('---------------------------------HellOoooOOoo-------------------------------------')
+            #print ("pair: ",pair)
+            #print ("pair[0]: ",pair[0])
+            #print ("pair[1]: ",pair[1])
+
+            #some links aren't in url_to_doc_id_index, such as martin5696.github.io/#services#about. ignore.
+            if pair[1] not in self.url_to_doc_id_index:
+                continue 
+            doc_id_tuple = (self.url_to_doc_id_index[pair[0]], self.url_to_doc_id_index[pair[1]])
             self.links_by_doc_id.append(doc_id_tuple)
 
-        print(self.links_by_doc_id)
+    def _print_shit(self):
+        print ("links_by_doc_id",self.links_by_doc_id)
+        #print ("------------------------------------------------SPLIT------------------------------------------------")
+        #print ("links: ",self.links)
+        #print("links_by_doc_id",self.links_by_doc_id)
 
     def crawl(self, depth=2, timeout=3):
         """Crawl the web!"""
@@ -401,9 +415,10 @@ class crawler(object):
                 self._populate_inverted_index()
                 self._populate_resolved_inverted_index()
                 self._convert_links_to_doc_id()
-                print('----------------------------------------')
-                print(self.links)
-                print('----------------------------------------')
+                
+                # TODO:store in database:
+                #   self._document_index (needed to retrive info given doc_id)
+                #   self.links_by_doc_id (neede by pageRank)
 
             except Exception as e:
                 print e
@@ -415,3 +430,4 @@ class crawler(object):
 if __name__ == "__main__":
     bot = crawler(None, "urls.txt")
     bot.crawl(depth=1)
+    bot._print_shit()

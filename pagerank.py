@@ -18,6 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import ast
+
 def page_rank(links, num_iterations=20, initial_pr=1.0):
     from collections import defaultdict
     import numpy as np
@@ -52,5 +54,9 @@ def page_rank(links, num_iterations=20, initial_pr=1.0):
     return page_rank
 
 if __name__ == "__main__":
-    print page_rank([(1,2), (2, 4), (4, 3)])
-    print page_rank([(1,2), (2, 4), (4, 3), (3, 1), (3, 2)])
+    #read from file for now for dev purpose. will need to read from DB once it's set up
+    with open('link_relations') as f:
+        mylist = [ast.literal_eval(line) for line in f]
+    links = mylist[0]
+    page_rank_scores = page_rank(links)
+    #save page_rank_scores into database

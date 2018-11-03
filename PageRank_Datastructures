@@ -12,13 +12,19 @@ In crawler.py:
 2. run pagerank.py and store the result in persistent database
 
 
+Data structures that need to be stored persistently:
+- Page Rank scores ([doc_id:score])
+- self.document_index
+- self.links_by_doc_id (used by pagerank.py)
+
 
 
 During every query:
 
-1. Filter all doc_id's that match query word using document_index
-2. sort result from one based on pageRank
-3. display
+1. Filter all doc_id's that match query word (need to access document_index)
+2. sort result from one based on pageRank score (need to access Page Rank Scores)
+#note that 1,2 above both work return doc_id. 
+3. display (need title, url, first 20 words. need to access document_index document_index)
 
 
 
