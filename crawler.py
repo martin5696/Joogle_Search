@@ -25,6 +25,8 @@ from bs4 import BeautifulSoup
 from bs4 import Tag
 from collections import defaultdict
 import re
+from pagerank import page_rank
+import redis
 
 def attr(elem, attr):
     """An html attribute from an html element. E.g. <a href="">, then
@@ -319,14 +321,19 @@ class crawler(object):
 
     def _populate_document_index(self):
         # need title, url, words
-        curr_word_id_list=[]
+        curr_word_list=[]
+        curr_word_id_list = []
         for curr_word_tuple in self._curr_words:
+            curr_word_list.append(self.inverted_lexicon[curr_word_tuple[0]])
             curr_word_id_list.append(curr_word_tuple[0])
+
+        print(curr_word_list)
 
         curr_doc = {}
         curr_doc['title'] = self._curr_title
         curr_doc['url'] = self._curr_url
         curr_doc['word_id'] = curr_word_id_list
+        curr_doc['words'] = curr_word_list
         self.document_index[self._curr_doc_id] = curr_doc
         self.url_to_doc_id_index[self._curr_url] = self._curr_doc_id
 
@@ -371,11 +378,8 @@ class crawler(object):
             doc_id_tuple = (self.url_to_doc_id_index[pair[0]], self.url_to_doc_id_index[pair[1]])
             self.links_by_doc_id.append(doc_id_tuple)
 
-    def _print_shit(self):
-        print ("links_by_doc_id",self.links_by_doc_id)
-        #print ("------------------------------------------------SPLIT------------------------------------------------")
-        #print ("links: ",self.links)
-        #print("links_by_doc_id",self.links_by_doc_id)
+    def _calculate_page_rank(self):
+        return page_rank(self.links_by_doc_id)
 
     def crawl(self, depth=2, timeout=3):
         """Crawl the web!"""
@@ -427,7 +431,15 @@ class crawler(object):
                 if socket:
                     socket.close()
 
+        r_server = redis.Redis("localhost")
+        r_server.hmset("document_index", self.document_index)
+
+def save_page_rank_score(page_rank_score):
+    r_server = redis.Redis("localhost")
+    r_server.hmset("page_rank_score", page_rank_score)
+
 if __name__ == "__main__":
     bot = crawler(None, "urls.txt")
     bot.crawl(depth=1)
-    bot._print_shit()
+    page_rank_score = bot._calculate_page_rank()
+    save_page_rank_score(page_rank_score)

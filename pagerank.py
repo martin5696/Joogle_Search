@@ -52,11 +52,3 @@ def page_rank(links, num_iterations=20, initial_pr=1.0):
             page_rank[doc_id] = lead + tail
     
     return page_rank
-
-if __name__ == "__main__":
-    #read from file for now for dev purpose. will need to read from DB once it's set up
-    with open('link_relations') as f:
-        mylist = [ast.literal_eval(line) for line in f]
-    links = mylist[0]
-    page_rank_scores = page_rank(links)
-    #save page_rank_scores into database

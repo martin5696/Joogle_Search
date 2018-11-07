@@ -18,6 +18,8 @@ from oauth2client.client import flow_from_clientsecrets
 from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
 
+import redis
+
 # session management
 session_opts = {
     'session.type': 'file',
@@ -177,6 +179,7 @@ def do_search():
 
   # parse words to remove special characters and split into a list of individual words
   words = parseQueryIntoWordList(keywords)
+  first_word = words[0]
 
   # populate query_word_occurence
   query_word_occurence = findWordOccurenceInQuery(words)
@@ -202,6 +205,31 @@ def do_search():
     recent_search_list = []
 
   user_info = { 'logged_in': session['logged_in'], 'name': session['name'], 'picture_path': session['picture'] }
+
+  r_server = redis.Redis("localhost")
+  page_rank_score = r_server.hgetall("page_rank_score")
+  document_index = r_server.hgetall("document_index")
+
+  print(page_rank_score)
+
+  for key in page_rank_score:
+    print(key)
+    print(type(key))
+
+  search_results = [] 
+  for doc_id in document_index:
+    doc_id_object_str = document_index[doc_id]
+    doc_id_object = ast.literal_eval(doc_id_object_str)
+
+    if (first_word in doc_id_object['words']):
+      if doc_id in page_rank_score:
+        doc_id_object['pagerank'] = float(page_rank_score[str(doc_id)])
+      else:
+        doc_id_object['pagerank'] = 0.0
+
+      search_results.append(doc_id_object)
+
+  sorted_search_results = sorted(search_results, key=itemgetter('pagerank'), reverse=True)
 
   # use template/resultpage.tmp as the view for the search results page
   return template('resultpage', user_info = user_info, keywords = keywords, recent_search_list = recent_search_list, sorted_words = sorted_words, query_word_occurence = query_word_occurence, retrieved_list_of_urls = retrieved_list_of_urls)
