@@ -61,7 +61,7 @@
           <div>
             <div class="result-url-header">
               <a href="{{ result['url'] }}">
-                <h3 class="url-title">Insert Title here</h3>
+                <h3 class="url-title">{{ result['title'] }}</h3>
                 <br>
                 <cite>{{ result['url'] }}</cite>
               </a>
