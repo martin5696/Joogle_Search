@@ -199,7 +199,7 @@ class crawler(object):
         """Called when visiting the <title> tag."""
         title_text = self._text_of(elem).strip()
         self._curr_title=repr(title_text)
-        print "document title="+ repr(title_text)
+        #print "document title="+ repr(title_text)
 
         # TODO update document title for document id self._curr_doc_id
     
@@ -222,11 +222,11 @@ class crawler(object):
 
         # TODO add title/alt/text to index for destination url
     
-    def _add_words_to_document(self):
+    #def _add_words_to_document(self):
         # TODO: knowing self._curr_doc_id and the list of all words and their
         #       font sizes (in self._curr_words), add all the words into the
         #       database for this document
-        print "    num words="+ str(len(self._curr_words))
+        #print "    num words="+ str(len(self._curr_words))
 
     def _increase_font_factor(self, factor):
         """Increade/decrease the current font size."""
@@ -327,8 +327,6 @@ class crawler(object):
             curr_word_list.append(self.inverted_lexicon[curr_word_tuple[0]])
             curr_word_id_list.append(curr_word_tuple[0])
 
-        print(curr_word_list)
-
         curr_doc = {}
         curr_doc['title'] = self._curr_title
         curr_doc['url'] = self._curr_url
@@ -412,7 +410,7 @@ class crawler(object):
                 self._font_size = 0
                 self._curr_words = []
                 self._index_document(soup)
-                self._add_words_to_document()
+                #self._add_words_to_document()
 
                 # populate data structures
                 self._populate_document_index()
@@ -437,6 +435,14 @@ class crawler(object):
 def save_page_rank_score(page_rank_score):
     r_server = redis.Redis("localhost")
     r_server.hmset("page_rank_score", page_rank_score)
+
+def return_page_rank():
+  bot = crawler(None, "urls.txt")
+  bot.crawl(depth=1)
+  page_rank_score = bot._calculate_page_rank()
+  save_page_rank_score(page_rank_score)
+  return page_rank_score
+
 
 if __name__ == "__main__":
     bot = crawler(None, "urls.txt")

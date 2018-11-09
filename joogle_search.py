@@ -29,6 +29,7 @@ session_opts = {
 }
 app = SessionMiddleware(bottle.app(), session_opts)
 
+user_keywords = ''
 # global variable hash to store how many times each word has appeared in all the searches in current session
 word_occurence_history={}
 
@@ -175,9 +176,10 @@ def signout():
 # callback function for POST http request. It's the result page after form submission and returns template/resultpage.tpl
 @post('/results')
 def do_search():
-  global recent_search_history
+  global recent_search_history, user_keywords
   # get the raw input from user using an html form
   keywords = request.forms.get('keywords')
+  user_keywords = keywords
 
   # parse words to remove special characters and split into a list of individual words
   words = parseQueryIntoWordList(keywords)
@@ -212,12 +214,20 @@ def do_search():
   page_rank_score = r_server.hgetall("page_rank_score")
   document_index = r_server.hgetall("document_index")
 
+  print (page_rank_score)
+  print (document_index)
+
+
   search_results = []
+  #iterate through all documents
   for doc_id in document_index:
+    #get current document_index object
     doc_id_object_str = document_index[doc_id]
+    #convert it to a has (originally it's a string)
     doc_id_object = ast.literal_eval(doc_id_object_str)
 
-    if (first_word in doc_id_object['words']):
+    #if word is in the list of words
+    if (first_word in doc_id_object['title'] or first_word in doc_id_object['words']):
       if doc_id in page_rank_score:
         doc_id_object['pagerank'] = float(page_rank_score[str(doc_id)])
       else:
@@ -228,11 +238,6 @@ def do_search():
 
   sorted_search_results = sorted(search_results, key=itemgetter('pagerank'), reverse=True)
   chunks = [sorted_search_results[x:x+5] for x in xrange(0, len(sorted_search_results), 5)]
-  # print(chunks)
-  for list1 in chunks:
-    print('-----------------------------------')
-    for list2 in list1:
-      print(list2['url'])
 
   global retrieved_list_of_urls
 
@@ -242,8 +247,10 @@ def do_search():
     'url_results_info': chunks
   }
 
+  print (retrieved_list_of_urls)
+
   # use template/resultpage.tmp as the view for the search results page
-  return template('resultpage', user_info = user_info, keywords = keywords, recent_search_list = recent_search_list, sorted_words = sorted_words, query_word_occurence = query_word_occurence, retrieved_list_of_urls = retrieved_list_of_urls)
+  return template('resultpage', user_info = user_info, keywords = user_keywords, recent_search_list = recent_search_list, sorted_words = sorted_words, query_word_occurence = query_word_occurence, retrieved_list_of_urls = retrieved_list_of_urls)
 
 @get('/paginate_results/<page_num>')
 def paginate_results(page_num):
@@ -253,7 +260,7 @@ def paginate_results(page_num):
   session = request.environ.get('beaker.session')
   user_info = { 'logged_in': session['logged_in'], 'name': session['name'], 'picture_path': session['picture'] }
 
-  return template('resultpage', user_info = user_info, keywords = 'yolo swag', recent_search_list = [], sorted_words = [], query_word_occurence = [], retrieved_list_of_urls = retrieved_list_of_urls)
+  return template('resultpage', user_info = user_info, keywords = user_keywords, recent_search_list = [], sorted_words = [], query_word_occurence = [], retrieved_list_of_urls = retrieved_list_of_urls)
 
 
 # parse words to remove special characters and split into a list of individual words
@@ -327,7 +334,15 @@ def getTop10KeywordsDescending():
 
 @error(404)
 def error404(error):
-  return template("<a href=/results>Go back to results page</a>")
+  return "<h1>ERROR 404: PAGE NOT FOUND</h1> <br> <a href=/paginate_results/0>Go back to results page</a>"
+
+@error(500)
+def error500(error):
+  session = request.environ.get('beaker.session')
+  if 'logged_in' not in session:
+    session['logged_in'] = False
+
+  return "<h1>ERROR 500: INTERNAL SERVER ERROR</h1> <br> <a href=/paginate_results/0>Go back to results page</a>"
 
 # route for static files. Need this callback to specify which files to be served and where to find them
 @route('/static/<filename>')

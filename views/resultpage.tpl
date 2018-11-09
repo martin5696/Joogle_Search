@@ -25,6 +25,13 @@
       </div>
       % end
     </div>
+    <form action="/results" method="post">
+      <input name="keywords" type="text" class="input-search-box"/>
+      <br>
+      <div class="search-buttons">
+        <input value="Joogle Search" type="submit" />
+      </div>
+    </form>
     <div class="body">
 <!--       <div class="query-data-tables">
         <p>Search for "{{ keywords }}"</p>
@@ -57,20 +64,23 @@
       </div> -->
       <div class="result-page-content">
         <p>Showing results for "{{ keywords }}"</p>
-        % for result in retrieved_list_of_urls['url_results_info'][retrieved_list_of_urls['current_page_num']]:
-          <div>
-            <div class="result-url-header">
-              <a href="{{ result['url'] }}">
-                <h3 class="url-title">{{ result['title'] }}</h3>
-                <br>
-                <cite>{{ result['url'] }}</cite>
-              </a>
+        % if (retrieved_list_of_urls['url_results_info'] != []):
+          % for result in retrieved_list_of_urls['url_results_info'][retrieved_list_of_urls['current_page_num']]:
+            <div>
+              <div class="result-url-header">
+                <a href="{{ result['url'] }}">
+                  <h3 class="url-title">{{ result['title'] }}</h3>
+                  <br>
+                  <cite>{{ result['url'] }}</cite>
+                </a>
+              </div>
+              <div class="result-url-description">
+                <span>{{ result['description'] }}</span>
+              </div>
             </div>
-            <div class="result-url-description">
-              <span>{{ result['description'] }}</span>
-            </div>
-          </div>
-        % end
+          % end
+        % else: 
+        <p>No results found</p>
       </div>
       <div class="pagination-buttons">
         <table>
