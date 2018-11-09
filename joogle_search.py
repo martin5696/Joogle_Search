@@ -1,4 +1,4 @@
-from bottle import get, post, route, run, template, request, re, static_file
+from bottle import get, post, route, run, template, request, re, static_file, error
 from operator import itemgetter
 
 import os
@@ -223,7 +223,7 @@ def do_search():
       else:
         doc_id_object['pagerank'] = 0.0
 
-      doc_id_object['description'] = ' '.join(doc_id_object['words'])
+      doc_id_object['description'] = ' '.join(doc_id_object['words'][:20])
       search_results.append(doc_id_object)
 
   sorted_search_results = sorted(search_results, key=itemgetter('pagerank'), reverse=True)
@@ -325,6 +325,9 @@ def inputWordsInOccurrenceHistory(word_occurrence):
 def getTop10KeywordsDescending():
   return sorted(word_occurence_history.items(), key=itemgetter(1), reverse=True)[:10]
 
+@error(404)
+def error404(error):
+  return template("<a href=/results>Go back to results page</a>")
 
 # route for static files. Need this callback to specify which files to be served and where to find them
 @route('/static/<filename>')

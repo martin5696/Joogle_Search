@@ -26,7 +26,7 @@
       % end
     </div>
     <div class="body">
-      <div class="query-data-tables">
+<!--       <div class="query-data-tables">
         <p>Search for "{{ keywords }}"</p>
         <table class="results">
           <caption>Results</caption>
@@ -54,7 +54,7 @@
             % end
           </table>
         % end
-      </div>
+      </div> -->
       <div class="result-page-content">
         <p>Showing results for "{{ keywords }}"</p>
         % for result in retrieved_list_of_urls['url_results_info'][retrieved_list_of_urls['current_page_num']]:
