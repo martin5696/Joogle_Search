@@ -89,3 +89,15 @@ Benchmark Setup:
 - We use the other AWS instance to run a simple benchmark using ab by specifying the number of requests and number of concurrent connections
 - On the detached AWS instance, we run htop, iostat and iftop when the simple benchmark is running and recording that data at its maximum and minimum values
 
+
+# Lab 3 Information:
+
+Please see #### for Redis installation instructions.
+
+To see the PageRank scores in a pretty-printed format, please run the following python script:
+> python run_backend_test.py
+
+To launch the Joogle website, please run the following shell script:
+> ./launch_joogle.sh
+
+Please note that the Redis server will stay up and running with the above shell script. Remember to kill it!
