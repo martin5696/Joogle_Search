@@ -1,0 +1,20 @@
+Redis Installation Steps:
+
+1. Follow installation steps for Redis:
+https://redis.io/topics/quickstart
+
+2. Ensure there is a running redis server
+> redis-server
+
+3. Install redis-py (https://github.com/andymccurdy/redis-py)
+> pip install redis --user
+
+4. Read the redis-py documentation:
+https://redis-py.readthedocs.io/en/latest/
+
+
+
+> import redis
+> r_server = redis.Redis("localhost")
+> r_server.hmset("<dict name>", <dict>)
+> r_server.hgetall("<dict name>")
