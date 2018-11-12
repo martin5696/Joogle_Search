@@ -25,13 +25,12 @@
       </div>
       % end
     </div>
-    <form action="/results" method="post">
-      <input name="keywords" type="text" class="input-search-box"/>
-      <br>
-      <div class="search-buttons">
-        <input value="Joogle Search" type="submit" />
-      </div>
-    </form>
+    <div class="search-box">
+      <form action="/results" method="post">
+        <input name="keywords" type="text" class="input-search-box"/>
+        <input value="Joogle Search" type="submit" class="search-buttons"/>
+      </form>
+    </div>
     <div class="body">
 <!--       <div class="query-data-tables">
         <p>Search for "{{ keywords }}"</p>
@@ -63,7 +62,7 @@
         % end
       </div> -->
       <div class="result-page-content">
-        <p>Showing results for "{{ keywords }}"</p>
+        <p class="result-sentence">Showing results for "{{ keywords }}"</p>
         % if (retrieved_list_of_urls['url_results_info'] != []):
           % for result in retrieved_list_of_urls['url_results_info'][retrieved_list_of_urls['current_page_num']]:
             <div>
