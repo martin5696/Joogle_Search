@@ -50,8 +50,11 @@ def search():
   global recent_search_history
   session = request.environ.get('beaker.session')
   if 'logged_in' in session:
+    session['logged_in'] = False
+    session['name'] = 'Anonymous'
+    session['email'] = ''    
+    session['picture'] = ''
     if session['logged_in'] == True:
-
       # read user search history from file
       if (os.path.isfile(search_history_path+session['email'])):
         f = open(search_history_path+session['email'],"r")
@@ -228,6 +231,12 @@ def find_matching_pages(first_word, document_index, page_rank_score):
     doc_id_object_str = document_index[doc_id]
     #convert it to a has (originally it's a string)
     doc_id_object = ast.literal_eval(doc_id_object_str)
+
+    title = doc_id_object['title']
+    #remove unicode character
+    word = word.replace('u','')
+    word = word.replace("'",'')
+    doc_id_object['title']=word
 
     #if word is in the list of words
     if (first_word in doc_id_object['title'] or first_word in doc_id_object['words']):
