@@ -136,35 +136,39 @@ def signout():
 def do_search():
   global recent_search_history, user_keywords
   # get the raw input from user using an html form
-  keywords = request.forms.get('keywords')
-  user_keywords = keywords
+  user_keywords = request.forms.get('keywords')
 
   # parse words to remove special characters and split into a list of individual words
-  words = parseQueryIntoWordList(keywords)
+  words = parseQueryIntoWordList(user_keywords)
   first_word = words[0]
 
   # populate query_word_occurence
-  query_word_occurence = findWordOccurenceInQuery(words)
+  # query_word_occurence = findWordOccurenceInQuery(words)
   
   session = request.environ.get('beaker.session')
 
+  query_word_occurence = {}
+  sorted_words = []
+  recent_search_list = []
+
   # if user logged in, display search history and store current search results
-  if session['logged_in'] == True:
+  # if session['logged_in'] == True:
     # input words from current search into the global variable word_occurence_history
-    inputWordsInOccurrenceHistory(query_word_occurence)
+    # inputWordsInOccurrenceHistory(query_word_occurence)
 
     # input words from current search into the global variable recent_search_history
     # this function also removes duplicates from recent_search_history
-    inputWordsInRecentHistory(words)
+    # inputWordsInRecentHistory(words)
 
     #get 10 words from recent_search_list from global var recent_search_history
-    recent_search_list = recent_search_history[:10]
+    # recent_search_list = recent_search_history[:10]
 
     # return the top 20 most frequently searched words in word_occurence_history
-    sorted_words = getTop10KeywordsDescending()
-  else:
-    sorted_words = []
-    recent_search_list = []
+    # sorted_words = getTop10KeywordsDescending()
+  # else:
+    # query_word_occurence = {}
+    # sorted_words = []
+    # recent_search_list = []
 
   user_info = { 'logged_in': session['logged_in'], 'name': session['name'], 'picture_path': session['picture'] }
 
@@ -191,8 +195,6 @@ def do_search():
     'url_results_info': chunks
   }
 
-  print(retrieved_list_of_urls)
-
   # use template/resultpage.tmp as the view for the search results page
   return template('resultpage', user_info = user_info, keywords = user_keywords, recent_search_list = recent_search_list, sorted_words = sorted_words, query_word_occurence = query_word_occurence, retrieved_list_of_urls = retrieved_list_of_urls)
 
@@ -205,7 +207,7 @@ def paginate_results(page_num):
   session = request.environ.get('beaker.session')
   user_info = { 'logged_in': session['logged_in'], 'name': session['name'], 'picture_path': session['picture'] }
 
-  return template('resultpage', user_info = user_info, keywords = user_keywords, recent_search_list = [], sorted_words = [], query_word_occurence = [], retrieved_list_of_urls = retrieved_list_of_urls)
+  return template('resultpage', user_info = user_info, keywords = user_keywords, recent_search_list = [], sorted_words = [], query_word_occurence = {}, retrieved_list_of_urls = retrieved_list_of_urls)
 
 
 # parse words to remove special characters and split into a list of individual words
@@ -238,8 +240,6 @@ def find_matching_pages(first_word, document_index, page_rank_score):
       search_results.append(doc_id_object)
 
   return search_results
-
-
 
 # populate query_word_occurence with number of appearances of each word in current search
 def findWordOccurenceInQuery(words):
@@ -303,6 +303,10 @@ def getTop10KeywordsDescending():
 
 @error(404)
 def error404(error):
+  session = request.environ.get('beaker.session')
+  if 'logged_in' not in session:
+    session['logged_in'] = False
+    
   return "<h1>ERROR 404: PAGE NOT FOUND</h1> <br> <a href=/paginate_results/0>Go back to results page</a>"
 
 @error(500)

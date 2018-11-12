@@ -81,6 +81,7 @@
           % end
         % else: 
         <p>No results found</p>
+        % end
       </div>
       <div class="pagination-buttons">
         <table>
