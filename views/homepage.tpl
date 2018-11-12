@@ -28,7 +28,7 @@
     <div class="body">
       <h1 class="title">Joogle</h1>
       <form action="/results" method="post">
-        <input name="keywords" type="text" class="input-search-box"/>
+        <input name="keywords" type="text" class="input-search-box" required/>
         <br>
         <div class="search-buttons">
           <input value="Joogle Search" type="submit" />
