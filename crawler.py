@@ -291,14 +291,10 @@ class crawler(object):
                     stack.pop()
 
                 tag_name = tag.name.lower()
-                #print ("bonjour tag_name",tag_name)
 
-                if tag_name == 'a' and 'href' in tag and tag['href'] != '':
-                  print("anything here?")
-                  tag_url = tag['href']
+                if tag_name == 'a' and tag.has_attr('href') and tag['href'] != '':
 
-                  if not tag_url.startswith("http"):
-                    tag_url = self._curr_url+tag_url
+                  tag_url = self._fix_url(self._curr_url, tag['href'])
 
                   self.links.append(tuple((self._curr_url, tag_url)))
 
@@ -364,14 +360,7 @@ class crawler(object):
         return self.resolved_inverted_index
 
     def _convert_links_to_doc_id(self):
-        #print ("url_to_doc_id_index: ", self.url_to_doc_id_index)
-        #print(self.links)
         for pair in self.links:
-            #print('---------------------------------HellOoooOOoo-------------------------------------')
-            #print ("pair: ",pair)
-            #print ("pair[0]: ",pair[0])
-            #print ("pair[1]: ",pair[1])
-
             #some links aren't in url_to_doc_id_index, such as martin5696.github.io/#services#about. ignore.
             if pair[1] not in self.url_to_doc_id_index:
                 continue 
@@ -403,19 +392,16 @@ class crawler(object):
             
             socket = None
             try:
-                #print("bonhour")
                 socket = urllib2.urlopen(url, timeout=timeout)
                 soup = BeautifulSoup(socket.read(), features="html.parser")
-                #print("bonhour2")
+
                 self._curr_depth = depth_ + 1
                 self._curr_url = url
                 self._curr_doc_id = doc_id
                 self._font_size = 0
                 self._curr_words = []
-                #print("bonjour2.5")
+
                 self._index_document(soup)
-                #self._add_words_to_document()
-                #print("bonhour3")
 
                 # populate data structures
                 self._populate_document_index()
@@ -423,18 +409,7 @@ class crawler(object):
                 self._populate_resolved_inverted_index()
                 self._convert_links_to_doc_id()
 
-                print (self.links_by_doc_id)
-
-                #print (url)
-                #print (self._curr_words)
-                #print (self.document_index)
-                
-                # TODO:store in database:
-                #   self._document_index (needed to retrive info given doc_id)
-                #   self.links_by_doc_id (neede by pageRank)
-
             except Exception as e:
-                print("exception?")
                 print e
                 pass
             finally:
@@ -450,15 +425,14 @@ def save_page_rank_score(page_rank_score):
 
 #only used in run_backend_test.py
 def return_page_rank():
-  bot = crawler(None, "urls.txt")
-  bot.crawl(depth=1)
-  if bot.links_by_doc_id:
-    page_rank_score = bot._calculate_page_rank()
-    save_page_rank_score(page_rank_score)
-    return page_rank_score
-  else:
-    return []
-
+    bot = crawler(None, "urls.txt")
+    bot.crawl(depth=1)
+    if bot.links_by_doc_id:
+        page_rank_score = bot._calculate_page_rank()
+        save_page_rank_score(page_rank_score)
+        return page_rank_score
+    else:
+        return []
 
 if __name__ == "__main__":
     bot = crawler(None, "urls.txt")
