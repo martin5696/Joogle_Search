@@ -92,7 +92,7 @@ Benchmark Setup:
 
 # Lab 3 Information:
 
-Please see #### for Redis installation instructions.
+Please see redis_installation_steps.txt for Redis installation instructions.
 
 To see the PageRank scores in a pretty-printed format, please run the following python script:
 > python run_backend_test.py
