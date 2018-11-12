@@ -4,6 +4,7 @@ import crawler
 
 
 #get page_rank_score
+
 page_rank_score = crawler.return_page_rank()
 
 page_rank_list = []

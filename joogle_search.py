@@ -210,33 +210,19 @@ def do_search():
 
   user_info = { 'logged_in': session['logged_in'], 'name': session['name'], 'picture_path': session['picture'] }
 
+  #retrieve the needed data structures from database
   r_server = redis.Redis("localhost")
   page_rank_score = r_server.hgetall("page_rank_score")
   document_index = r_server.hgetall("document_index")
 
-  print (page_rank_score)
-  print (document_index)
+  #find pages that contain this word
+  #returns a list of hashes
+  search_results = find_matching_pages(first_word, document_index, page_rank_score)
 
-
-  search_results = []
-  #iterate through all documents
-  for doc_id in document_index:
-    #get current document_index object
-    doc_id_object_str = document_index[doc_id]
-    #convert it to a has (originally it's a string)
-    doc_id_object = ast.literal_eval(doc_id_object_str)
-
-    #if word is in the list of words
-    if (first_word in doc_id_object['title'] or first_word in doc_id_object['words']):
-      if doc_id in page_rank_score:
-        doc_id_object['pagerank'] = float(page_rank_score[str(doc_id)])
-      else:
-        doc_id_object['pagerank'] = 0.0
-
-      doc_id_object['description'] = ' '.join(doc_id_object['words'][:20])
-      search_results.append(doc_id_object)
-
+  #rank results by descending order or PageRank score
   sorted_search_results = sorted(search_results, key=itemgetter('pagerank'), reverse=True)
+
+  #divide results into a list of chunks of 5
   chunks = [sorted_search_results[x:x+5] for x in xrange(0, len(sorted_search_results), 5)]
 
   global retrieved_list_of_urls
@@ -247,11 +233,12 @@ def do_search():
     'url_results_info': chunks
   }
 
-  print (retrieved_list_of_urls)
+  #print (retrieved_list_of_urls)
 
   # use template/resultpage.tmp as the view for the search results page
   return template('resultpage', user_info = user_info, keywords = user_keywords, recent_search_list = recent_search_list, sorted_words = sorted_words, query_word_occurence = query_word_occurence, retrieved_list_of_urls = retrieved_list_of_urls)
 
+#display search results on each page
 @get('/paginate_results/<page_num>')
 def paginate_results(page_num):
   global retrieved_list_of_urls
@@ -271,6 +258,30 @@ def parseQueryIntoWordList(query):
   words = keywords_without_special_char.split()
 
   return words
+
+#Find pages that contain the word being searched
+def find_matching_pages(first_word, document_index, page_rank_score):
+  search_results = []
+  #iterate through all documents
+  for doc_id in document_index:
+    #get current document_index object
+    doc_id_object_str = document_index[doc_id]
+    #convert it to a has (originally it's a string)
+    doc_id_object = ast.literal_eval(doc_id_object_str)
+
+    #if word is in the list of words
+    if (first_word in doc_id_object['title'] or first_word in doc_id_object['words']):
+      if doc_id in page_rank_score:
+        doc_id_object['pagerank'] = float(page_rank_score[str(doc_id)])
+      else:
+        doc_id_object['pagerank'] = 0.0
+
+      doc_id_object['description'] = ' '.join(doc_id_object['words'][:20])
+      search_results.append(doc_id_object)
+
+  return search_results
+
+
 
 # populate query_word_occurence with number of appearances of each word in current search
 def findWordOccurenceInQuery(words):
