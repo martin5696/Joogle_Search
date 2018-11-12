@@ -233,6 +233,7 @@ def find_matching_pages(first_word, document_index, page_rank_score):
     doc_id_object = ast.literal_eval(doc_id_object_str)
 
     title = doc_id_object['title']
+    word = title
     #remove unicode character
     word = word.replace('u','')
     word = word.replace("'",'')
