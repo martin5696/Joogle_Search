@@ -1,0 +1,21 @@
+Feature route:
+- Multi-word searching
+	- return pageRank result of every word
+	- find the ones where all words appear, give them highest pageRank score (x1000)
+	- find pages where (all words)-1, give them second pageRank score (x100)
+	- find pages where (all words)-2, give them second pageRank score (x10)
+	......
+	- (include frequency)
+- animate logo
+- Query phrase interpretation
+	- math expressions (shunting yard algorithm)
+- search suggestion + autocompletion
+	- backend: hash parially entered words to all bigger words in the English dictionary
+	- frontend: show dropdown, press button to auto-complete
+
+
+> sugg
+
+suggesting
+suggestion
+sugggest
