@@ -26,7 +26,16 @@
       % end
     </div>
     <div class="body">
-      <h1 class="title">Joogle</h1>
+      <svg viewBox="0 0 400 200" class="title">
+        <symbol id="s-text">
+          <text text-anchor="middle" x="50%" y="50%" dy=".35em">Joogle</text>
+        </symbol>
+        <use class="text" xlink:href="#s-text"></use>
+        <use class="text" xlink:href="#s-text"></use>
+        <use class="text" xlink:href="#s-text"></use>
+        <use class="text" xlink:href="#s-text"></use>
+        <use class="text" xlink:href="#s-text"></use>
+      </svg>
       <form action="/results" method="post">
         <input name="keywords" type="text" class="input-search-box" required/>
         <br>
