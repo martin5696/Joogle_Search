@@ -85,6 +85,7 @@ def search():
 
     bottle.redirect('/')
 
+
 # sign-in page
 @route('/signin', 'GET')
 def home():
