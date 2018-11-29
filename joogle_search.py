@@ -21,6 +21,7 @@ from googleapiclient.discovery import build
 import redis
 import copy
 
+import shunting_yard_algorithm
 
 # session management
 session_opts = {
@@ -144,66 +145,74 @@ def do_search():
   # get the raw input from user using an html form
   user_keywords = request.forms.get('keywords')
 
-  # parse words to remove special characters and split into a list of individual words
-  words = parseQueryIntoWordList(user_keywords)
-  #only search the first word for lab3
-  first_word = words[0]
-
-  # populate query_word_occurence
-  # query_word_occurence = findWordOccurenceInQuery(words)
-  
   session = request.environ.get('beaker.session')
 
+  user_info = { 'logged_in': session['logged_in'], 'name': session['name'], 'picture_path': session['picture'] }
   query_word_occurence = {}
   sorted_words = []
   recent_search_list = []
-
-  # if user logged in, display search history and store current search results
-  # if session['logged_in'] == True:
-    # input words from current search into the global variable word_occurence_history
-    # inputWordsInOccurrenceHistory(query_word_occurence)
-
-    # input words from current search into the global variable recent_search_history
-    # this function also removes duplicates from recent_search_history
-    # inputWordsInRecentHistory(words)
-
-    #get 10 words from recent_search_list from global var recent_search_history
-    # recent_search_list = recent_search_history[:10]
-
-    # return the top 20 most frequently searched words in word_occurence_history
-    # sorted_words = getTop10KeywordsDescending()
-  # else:
-    # query_word_occurence = {}
-    # sorted_words = []
-    # recent_search_list = []
-
-  user_info = { 'logged_in': session['logged_in'], 'name': session['name'], 'picture_path': session['picture'] }
-
-  #retrieve the needed data structures from database
-  r_server = redis.Redis("localhost")
-  page_rank_score = r_server.hgetall("page_rank_score")
-  document_index = r_server.hgetall("document_index")
-
-  #find pages that contain this word
-  #returns a list of hashes
-  search_results = find_matching_pages(words, first_word, document_index, page_rank_score)
-
-  #rank results by descending order or PageRank score
-  sorted_search_results = sorted(search_results, key=itemgetter('pagerank'), reverse=True)
-
-  #divide results into a list of chunks of 5
-  chunks = [sorted_search_results[x:x+5] for x in xrange(0, len(sorted_search_results), 5)]
-
-  global retrieved_list_of_urls
-
   retrieved_list_of_urls = {
     'current_page_num': 0,
-    'total_page_num': len(chunks),
-    'url_results_info': chunks
+    'total_page_num': 0,
+    'url_results_info': []
   }
+  calculation = None
+
+  is_search_a_calculation_expression = re.search(r'[^+/*()\-\d\s]+', user_keywords) == None
+
+  if (is_search_a_calculation_expression):
+    calculation = shunting_yard_algorithm.evaluate(user_keywords)
+  else:
+    # parse words to remove special characters and split into a list of individual words
+    words = parseQueryIntoWordList(user_keywords)
+    #only search the first word for lab3
+    first_word = words[0]
+
+
+    # if user logged in, display search history and store current search results
+    # if session['logged_in'] == True:
+      # input words from current search into the global variable word_occurence_history
+      # inputWordsInOccurrenceHistory(query_word_occurence)
+
+      # input words from current search into the global variable recent_search_history
+      # this function also removes duplicates from recent_search_history
+      # inputWordsInRecentHistory(words)
+
+      #get 10 words from recent_search_list from global var recent_search_history
+      # recent_search_list = recent_search_history[:10]
+
+      # return the top 20 most frequently searched words in word_occurence_history
+      # sorted_words = getTop10KeywordsDescending()
+    # else:
+      # query_word_occurence = {}
+      # sorted_words = []
+      # recent_search_list = []
+
+    #retrieve the needed data structures from database
+    r_server = redis.Redis("localhost")
+    page_rank_score = r_server.hgetall("page_rank_score")
+    document_index = r_server.hgetall("document_index")
+
+    #find pages that contain this word
+    #returns a list of hashes
+    search_results = find_matching_pages(words, first_word, document_index, page_rank_score)
+
+    #rank results by descending order or PageRank score
+    sorted_search_results = sorted(search_results, key=itemgetter('pagerank'), reverse=True)
+
+    #divide results into a list of chunks of 5
+    chunks = [sorted_search_results[x:x+5] for x in xrange(0, len(sorted_search_results), 5)]
+
+    global retrieved_list_of_urls
+
+    retrieved_list_of_urls = {
+      'current_page_num': 0,
+      'total_page_num': len(chunks),
+      'url_results_info': chunks
+    }
 
   # use template/resultpage.tmp as the view for the search results page
-  return template('resultpage', user_info = user_info, keywords = user_keywords, recent_search_list = recent_search_list, sorted_words = sorted_words, query_word_occurence = query_word_occurence, retrieved_list_of_urls = retrieved_list_of_urls)
+  return template('resultpage', user_info = user_info, keywords = user_keywords, recent_search_list = recent_search_list, sorted_words = sorted_words, query_word_occurence = query_word_occurence, retrieved_list_of_urls = retrieved_list_of_urls, is_search_a_calculation_expression = is_search_a_calculation_expression, calculation = calculation)
 
 #display search results on each page
 @get('/paginate_results/<page_num>')
@@ -297,8 +306,6 @@ def find_matching_pages(words, first_word, document_index, page_rank_score):
 
 #Check if a page has all the words being searched
 def page_has_all_words(words, doc_id_object):
-  print("word being searched")
-  print(words)
   for word in words:
     if (word not in doc_id_object['words']):
       return False
