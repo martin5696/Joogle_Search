@@ -19,6 +19,8 @@ from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
 
 import redis
+import copy
+
 
 # session management
 session_opts = {
@@ -143,6 +145,7 @@ def do_search():
 
   # parse words to remove special characters and split into a list of individual words
   words = parseQueryIntoWordList(user_keywords)
+  #only search the first word for lab3
   first_word = words[0]
 
   # populate query_word_occurence
@@ -182,7 +185,7 @@ def do_search():
 
   #find pages that contain this word
   #returns a list of hashes
-  search_results = find_matching_pages(first_word, document_index, page_rank_score)
+  search_results = find_matching_pages(words, first_word, document_index, page_rank_score)
 
   #rank results by descending order or PageRank score
   sorted_search_results = sorted(search_results, key=itemgetter('pagerank'), reverse=True)
@@ -223,33 +226,85 @@ def parseQueryIntoWordList(query):
   return words
 
 #Find pages that contain the word being searched
-def find_matching_pages(first_word, document_index, page_rank_score):
+def find_matching_pages(words, first_word, document_index, page_rank_score):
   search_results = []
   #iterate through all documents
   for doc_id in document_index:
     #get current document_index object
     doc_id_object_str = document_index[doc_id]
-    #convert it to a has (originally it's a string)
+    #convert it to a hash (originally it's a string)
     doc_id_object = ast.literal_eval(doc_id_object_str)
 
+    #get the title of the page
     title = doc_id_object['title']
     word = title
+
     #remove unicode character
     word = word.replace('u','')
     word = word.replace("'",'')
     doc_id_object['title']=word
-
     #if word is in the list of words
-    if (first_word in doc_id_object['title'] or first_word in doc_id_object['words']):
-      if doc_id in page_rank_score:
-        doc_id_object['pagerank'] = float(page_rank_score[str(doc_id)])
-      else:
-        doc_id_object['pagerank'] = 0.0
+    # if (first_word in doc_id_object['title'] or first_word in doc_id_object['words']):
+    #  if doc_id in page_rank_score:
+    #    doc_id_object['pagerank'] = float(page_rank_score[str(doc_id)])
+    #  else:
+    #    doc_id_object['pagerank'] = 0.0
 
-      doc_id_object['description'] = ' '.join(doc_id_object['words'][:20])
-      search_results.append(doc_id_object)
+    #  doc_id_object['description'] = ' '.join(doc_id_object['words'][:20])
+    #  search_results.append(doc_id_object)
+
+    #new code
+    #duplicate words, this will be shrunken
+    temp_words = list(words)
+    found = False
+    page_rank_boost_factor = 10*len(temp_words) #"stepped tea double double" would have initial factor 40
+    #check if words or a subset of the words is inside the current page.
+    while (len(temp_words)!=0):
+      if (page_has_all_words(temp_words, doc_id_object)):
+        if doc_id in page_rank_score:
+          doc_id_object['pagerank'] = page_rank_boost_factor*float(page_rank_score[str(doc_id)])
+        else:
+          doc_id_object['pagerank'] = 0.0
+
+        doc_id_object['description'] = ' '.join(doc_id_object['words'][:20])
+        #if found, add this document and break to go on to the next one
+        search_results.append(doc_id_object)
+        found = True
+        break
+      #remove last word in words and continue the search
+      del temp_words[-1]
+      page_rank_boost_factor -= 10
+
+    #if not found above, check every word individually
+    if (not found):
+      for cur_word in words:
+        #found
+        if (cur_word in doc_id_object['title'] or cur_word in doc_id_object['words']):
+          if doc_id in page_rank_score:
+            #keep original page_rank_score
+            doc_id_object['pagerank'] = float(page_rank_score[str(doc_id)])
+          else:
+            doc_id_object['pagerank'] = 0.0
+
+          doc_id_object['description'] = ' '.join(doc_id_object['words'][:20])
+          search_results.append(doc_id_object)
+          #words found in doc and added to search_results, break. done with this doc
+          break
+
 
   return search_results
+
+#Check if a page has all the words being searched
+def page_has_all_words(words, doc_id_object):
+  print("word being searched")
+  print(words)
+  for word in words:
+    if (word not in doc_id_object['words']):
+      return False
+
+  return True
+
+
 
 # populate query_word_occurence with number of appearances of each word in current search
 def findWordOccurenceInQuery(words):
