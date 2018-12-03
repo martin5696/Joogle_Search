@@ -1,18 +1,49 @@
 #!/bin/bash
 
+#commands that will be ran automatically inside AWS instance
+SCRIPT="
+cd joogle_search/
+touch joogle.txt;
+exit;
+"
+
 #run using sh deployment_script.sh
 #chmod u+x if this doesn't run
 echo "	** Please wait while the aws instance spins up"
-echo "	** This may take close to a minute"
-
+echo "	** This will take around 1 minute"
 
 # this launches a new instance and gets its DNS
 # $public_DNS will store DNS of new instance
 
 public_dns=$(python launch_aws_instance.py)
+echo "	** The instance has been started and the DNS address fetched"
+echo "	** public_dns: $public_dns"
 
-echo $public_dns
+#permissions were too open??
+# might not need this since it's already changed
+chmod 400 martin_key.pem
+sshServer="ubuntu@$public_dns"
 
+echo "	** Uploading our program to AWS instance"
+#copies scp_recursive/ into root directory of instance
+scp -i martin_key.pem -r ../joogle_search "$sshServer":~/
+echo "	** program uploaded successfully to AWS instance"
+
+echo "	** Accessing AWS instance through SSH server: $sshServer"
+echo "	** AWS instance $sshServer accessed successfully"
+echo "	** Installing dependencies on AWS instance and starting our program. This may take a few minutes."
+
+ssh -i martin_key.pem "$sshServer" "${SCRIPT}"
+
+echo "Program successfully started. You can access it from here: $public_dns"
+
+
+
+
+
+
+
+#ssh -i martin_key.pem ubuntu@ec2-18-214-100-115.compute-1.amazonaws.com
 #copy joogle_search directory inside our instance
 #scp -i key_pair.pem <FILE-PATH> ubuntu@<PUBLIC-IP-ADDRESS>:~/<REMOTE-PATH>
 
