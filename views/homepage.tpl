@@ -1,5 +1,4 @@
 <html>
-
   <head>
     <link rel="stylesheet" href="/static/homepage.css">
   </head>
@@ -53,6 +52,7 @@
 </div>
 
 <script>
+  //Auto-refill implementation based on the following tutorial: https://www.w3schools.com/howto/howto_js_autocomplete.asp
         function test(){
 
           var existing = document.getElementById('inputField').value
