@@ -1,0 +1,11 @@
+sudo apt-get update
+
+sudo apt-get install python-pip
+
+pip install --user httplib2
+
+pip install --user beaker
+
+pip install --user oauth2client
+
+pip install --user google-api-python-client
