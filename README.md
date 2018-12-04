@@ -1,3 +1,16 @@
+# Lab 4 instructions:
+- To launch Joogle search on an AWS instance, run:
+	> sh deployment_script.sh
+- If prompted, enter yes to allow
+- To terminate the instance, run:
+	> sh termination_script.sh
+
+note:
+- Can't see results due to EC2 not compatible with Redis make installation in our deployment script.
+- All the additional features still function properly, but the database of results is not populated since our database isn't installed properly.
+- We could send you a dns address of a working server with a populated database to demonstrate the full functionality.
+
+
 # FRONTEND Overview/Instructions 
 # how we are referencing our CSS/tpl files
 
