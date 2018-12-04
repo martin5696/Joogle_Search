@@ -90,7 +90,7 @@ def search():
 # sign-in page
 @route('/signin', 'GET')
 def home():
-  flow = flow_from_clientsecrets("client_secrets.json",scope='https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile', redirect_uri="http://localhost:8080/redirect",prompt='consent')
+  flow = flow_from_clientsecrets("client_secrets.json",scope='https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile', redirect_uri="http://localhost:80/redirect",prompt='consent')
 
   # if already authorized, uri contains code. If node it conains access_denied
   uri = flow.step1_get_authorize_url()
@@ -395,4 +395,4 @@ def error500(error):
 def server_static(filename):
   return static_file(filename, root='./static_files')
 
-run (host='localhost', port=8080, debug=True, app=app)
+run (host='0.0.0.0', port=80, debug=True, app=app)

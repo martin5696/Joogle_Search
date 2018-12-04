@@ -2,9 +2,18 @@
 
 #commands that will be ran automatically inside AWS instance
 SCRIPT="
+sudo apt-get update -y
+sudo apt-get install python-pip -y
+pip install --upgrade --user pip
+pip install --user httplib2
+pip install --user beaker
+pip install --user oauth2client
+pip install --upgrade --user google-api-python-client
+sudo pip install BeautifulSoup4
+pip install redis --user
+sudo apt-get install redis-server -y
 cd joogle_search/
-touch joogle.txt;
-exit;
+sudo sh launch_joogle.sh
 "
 
 #run using sh deployment_script.sh
@@ -21,19 +30,20 @@ echo "	** public_dns: $public_dns"
 
 #permissions were too open??
 # might not need this since it's already changed
-chmod 400 martin_key.pem
+chmod 400 joogle_key.pem
 sshServer="ubuntu@$public_dns"
 
 echo "	** Uploading our program to AWS instance"
 #copies scp_recursive/ into root directory of instance
-scp -i martin_key.pem -r ../joogle_search "$sshServer":~/
+#assuming you are inside the root directory of the project
+scp -i joogle_key.pem -r ../joogle_search "$sshServer":~/
 echo "	** program uploaded successfully to AWS instance"
 
 echo "	** Accessing AWS instance through SSH server: $sshServer"
 echo "	** AWS instance $sshServer accessed successfully"
 echo "	** Installing dependencies on AWS instance and starting our program. This may take a few minutes."
 
-ssh -i martin_key.pem "$sshServer" "${SCRIPT}"
+ssh -i joogle_key.pem "$sshServer" "${SCRIPT}"
 
 echo "Program successfully started. You can access it from here: $public_dns"
 
