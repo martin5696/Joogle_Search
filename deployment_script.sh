@@ -12,7 +12,12 @@ pip install --upgrade --user google-api-python-client
 sudo pip install BeautifulSoup4
 pip install redis --user
 sudo apt-get install redis-server -y
-cd joogle_search/
+sudo wget http://download.redis.io/redis-stable.tar.gz
+sudo tar xvzf redis-stable.tar.gz
+cd redis-stable
+make
+make install
+cd ../joogle_search/
 sudo sh launch_joogle.sh
 "
 
@@ -36,7 +41,7 @@ sshServer="ubuntu@$public_dns"
 echo "	** Uploading our program to AWS instance"
 #copies scp_recursive/ into root directory of instance
 #assuming you are inside the root directory of the project
-scp -i joogle_key.pem -r ../joogle_search "$sshServer":~/
+scp -o StrictHostKeyChecking=no -i joogle_key.pem -r ../joogle_search "$sshServer":~/
 echo "	** program uploaded successfully to AWS instance"
 
 echo "	** Accessing AWS instance through SSH server: $sshServer"
